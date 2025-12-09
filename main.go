@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 type Visitor struct {
@@ -20,11 +22,16 @@ var db *sql.DB
 
 func main() {
 	var err error
+	port := os.Getenv("PORT")
 	dbURL := os.Getenv("DATABASE_URL")
 	db, err = sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 
 	http.HandleFunc("/api/checkin", handleCheckin)
 	http.HandleFunc("/api/visitors", handleVisitors)
